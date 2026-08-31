@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>امتحان: استخدامات الذكاء الاصطناعي في العمل اليومي</title>
+<style>
+  :root{
+    --graphite: #1c2226;
+    --graphite-2: #262e33;
+    --steel: #3a4750;
+    --amber: #e8a33d;
+    --amber-dim: #c68a2e;
+    --paper: #f2ede3;
+    --paper-dim: #cfc8b8;
+    --ok: #4caf7d;
+    --bad: #d6634a;
+    --line: #3d4750;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: var(--graphite);
+    background-image:
+      linear-gradient(160deg, rgba(232,163,61,0.05), transparent 40%),
+      repeating-linear-gradient(135deg, rgba(255,255,255,0.015) 0 2px, transparent 2px 40px);
+    color: var(--paper);
+    font-family: "Tahoma", "Segoe UI", "Cairo", sans-serif;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    padding: 24px 14px 60px;
+  }
+  .sheet{
+    width:100%;
+    max-width:720px;
+  }
+  .plate{
+    background: var(--graphite-2);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 22px 22px 18px;
+    margin-bottom: 18px;
+    position:relative;
+    overflow:hidden;
+  }
+  .plate::before{
+    content:"";
+    position:absolute;
+    top:0; right:0; bottom:0;
+    width:6px;
+    background: linear-gradient(180deg, var(--amber), var(--amber-dim));
+  }
+  header.plate{
+    text-align:center;
+    padding: 28px 20px 24px;
+  }
+  .kicker{
+    letter-spacing: 2px;
+    font-size: 11px;
+    color: var(--amber);
+    text-transform: uppercase;
+    margin-bottom:8px;
+    font-weight:700;
+  }
+  h1{
+    font-size: 21px;
+    margin: 4px 0 6px;
+    color: var(--paper);
+    line-height:1.5;
+  }
+  .company{
+    color: var(--paper-dim);
+    font-size: 14px;
+    margin:0;
+  }
+  .id-grid{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:18px;
+    justify-content:center;
+  }
+  .id-chip{
+    background: var(--graphite);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:8px 14px;
+    font-size:13px;
+    color: var(--paper-dim);
+  }
+  .id-chip b{
+    color: var(--paper);
+    font-weight:700;
+    margin-inline-start:6px;
+  }
+  .progress-wrap{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:16px;
+  }
+  .progress-track{
+    flex:1;
+    height:6px;
+    background: var(--graphite-2);
+    border-radius:3px;
+    overflow:hidden;
+    border:1px solid var(--line);
+  }
+  .progress-fill{
+    height:100%;
+    width:0%;
+    background: linear-gradient(90deg, var(--amber-dim), var(--amber));
+    transition: width .25s ease;
+  }
+  .progress-label{
+    font-size:12px;
+    color: var(--paper-dim);
+    white-space:nowrap;
+    min-width:64px;
+    text-align:left;
+  }
+  .qcard{
+    display:none;
+  }
+  .qcard.active{
+    display:block;
+    animation: rise .25s ease;
+  }
+  @keyframes rise{
+    from{opacity:0; transform:translateY(6px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+  .qnum{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:34px;height:34px;
+    border-radius:50%;
+    background: var(--amber);
+    color: var(--graphite);
+    font-weight:800;
+    font-size:14px;
+    margin-bottom:14px;
+  }
+  .qtext{
+    font-size:17px;
+    line-height:1.7;
+    margin: 4px 0 20px;
+    color: var(--paper);
+  }
+  .options{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .opt{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    background: var(--graphite);
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    padding: 12px 14px;
+    cursor:pointer;
+    font-size:15px;
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .opt:hover{
+    border-color: var(--amber-dim);
+  }
+  .opt.selected{
+    border-color: var(--amber);
+    background: rgba(232,163,61,0.08);
+  }
+  .opt.correct{
+    border-color: var(--ok);
+    background: rgba(76,175,125,0.12);
+  }
+  .opt.incorrect{
+    border-color: var(--bad);
+    background: rgba(214,99,74,0.12);
+  }
+  .opt .badge{
+    flex-shrink:0;
+    width:26px;height:26px;
+    border-radius:4px;
+    background: var(--steel);
+    color: var(--paper);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:13px;
+    font-weight:700;
+  }
+  .opt.correct .badge{ background: var(--ok); color:#0f1a14;}
+  .opt.incorrect .badge{ background: var(--bad); color:#1a0f0d;}
+  .feedback{
+    margin-top:14px;
+    font-size:13px;
+    padding:10px 12px;
+    border-radius:4px;
+    display:none;
+  }
+  .feedback.show{ display:block; }
+  .feedback.right{ background: rgba(76,175,125,0.12); color:#9fe4bf; }
+  .feedback.wrong{ background: rgba(214,99,74,0.12); color:#f3b5a6; }
+  .nav-row{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    margin-top:8px;
+  }
+  button.nav{
+    flex:1;
+    padding: 13px 10px;
+    border-radius: 5px;
+    border: 1px solid var(--line);
+    background: var(--graphite);
+    color: var(--paper);
+    font-size: 14px;
+    font-weight:700;
+    cursor:pointer;
+    font-family:inherit;
+  }
+  button.nav.primary{
+    background: var(--amber);
+    color: var(--graphite);
+    border-color: var(--amber);
+  }
+  button.nav:disabled{
+    opacity:0.35;
+    cursor:not-allowed;
+  }
+  .dots{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    justify-content:center;
+    margin: 16px 0 6px;
+  }
+  .dot{
+    width:9px;height:9px;
+    border-radius:50%;
+    background: var(--line);
+    cursor:pointer;
+  }
+  .dot.answered{ background: var(--steel); }
+  .dot.current{ background: var(--amber); }
+  .result{
+    text-align:center;
+    padding: 30px 20px;
+  }
+  .result .score{
+    font-size: 52px;
+    font-weight:800;
+    color: var(--amber);
+    margin: 6px 0;
+  }
+  .result .outof{
+    font-size:14px;
+    color: var(--paper-dim);
+    margin-bottom:20px;
+  }
+  .result .msg{
+    font-size:15px;
+    color: var(--paper);
+    margin-bottom: 22px;
+  }
+  .review-item{
+    text-align:right;
+    background: var(--graphite);
+    border:1px solid var(--line);
+    border-radius:5px;
+    padding:12px 14px;
+    margin-bottom:10px;
+    font-size:13px;
+    line-height:1.6;
+  }
+  .review-item .rq{ color: var(--paper); font-weight:700; margin-bottom:4px; }
+  .review-item .ra{ color: var(--paper-dim); }
+  .review-item.right{ border-inline-start: 3px solid var(--ok); }
+  .review-item.wrong{ border-inline-start: 3px solid var(--bad); }
+  .footer-note{
+    text-align:center;
+    font-size:11px;
+    color: var(--paper-dim);
+    margin-top: 20px;
+    letter-spacing:0.5px;
+  }
+  #startBtn{
+    margin-top:22px;
+    width:100%;
+    padding:14px;
+    background: var(--amber);
+    color: var(--graphite);
+    border:none;
+    border-radius:5px;
+    font-size:15px;
+    font-weight:800;
+    cursor:pointer;
+    font-family:inherit;
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <header class="plate" id="coverPlate">
+    <div class="kicker">سلسلة التدريب على الذكاء الاصطناعي</div>
+    <h1>امتحان: استخدامات الذكاء الاصطناعي في العمل اليومي</h1>
+    <p class="company">عصفور للتعدين والحراريات</p>
+    <div class="id-grid">
+      <div class="id-chip">الاسم<b>محمد عبد التواب</b></div>
+      <div class="id-chip">القسم<b>الكهرباء</b></div>
+      <div class="id-chip">الرقم<b>٠١١٢٤٨٥٩٢٨٣</b></div>
+    </div>
+    <button id="startBtn">ابدأ الامتحان (٢٠ سؤال)</button>
+  </header>
+
+  <div id="quizArea" style="display:none;">
+    <div class="plate">
+      <div class="progress-wrap">
+        <span class="progress-label" id="progressLabel">سؤال ١ / ٢٠</span>
+        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      </div>
+
+      <div id="questionsHost"></div>
+
+      <div class="nav-row">
+        <button class="nav" id="prevBtn">السابق</button>
+        <button class="nav primary" id="nextBtn">التالي</button>
+      </div>
+
+      <div class="dots" id="dotsHost"></div>
+    </div>
+  </div>
+
+  <div class="plate" id="resultPlate" style="display:none;">
+    <div class="result">
+      <div class="kicker">النتيجة النهائية</div>
+      <div class="score" id="scoreText">٠</div>
+      <div class="outof">من ٢٠ سؤالاً</div>
+      <div class="msg" id="resultMsg"></div>
+      <button class="nav primary" id="reviewBtn" style="width:100%;margin-bottom:10px;">مراجعة الإجابات</button>
+      <button class="nav" id="restartBtn" style="width:100%;">إعادة الامتحان</button>
+    </div>
+  </div>
+
+  <div id="reviewHost" style="display:none;"></div>
+
+  <div class="footer-note">AI MASTERY · AI TRAINING SERIES — عصفور للتعدين والحراريات</div>
+</div>
+
+<script>
+const questions = [
+  { q: "طبقاً للشريحة الافتتاحية، ما هي النسبة المئوية للمؤسسات التي تستخدم الذكاء الاصطناعي بالفعل؟",
+    opts: ["٥٠٪", "٨٨٪", "٢٥٪", "٩٩٪"], correct: 1 },
+  { q: "كم عدد الساعات التي يمكن أن يستعيدها الموظف يومياً عند إتقانه استخدام الذكاء الاصطناعي؟",
+    opts: ["ساعة واحدة", "من ٢ إلى ٤ ساعات", "٦ ساعات", "٨ ساعات"], correct: 1 },
+  { q: "ما هو التعريف الصحيح للذكاء الاصطناعي كما ورد في الكورس؟",
+    opts: ["برنامج يتبع قواعد ثابتة مكتوبة مسبقاً فقط", "قدرة الآلة على أداء مهام تتطلب ذكاءً بشرياً عن طريق التعلّم من البيانات والتجربة", "جهاز حاسوب سريع جداً في المعالجة", "نظام تشغيل حديث للهواتف الذكية"], correct: 1 },
+  { q: "في أي عام ظهر 'نموذج المحوّل' (Transformer) الذي يُعد أساس نماذج اللغة الحديثة؟",
+    opts: ["١٩٥٠", "١٩٨٠", "٢٠١٢", "٢٠١٧"], correct: 3 },
+  { q: "أي أنواع الذكاء الاصطناعي الثلاثة هو الذي يتقن مهمة واحدة بكفاءة عالية، وهو ما نستخدمه اليوم فعلياً؟",
+    opts: ["الذكاء العام (AGI)", "الذكاء الفائق (ASI)", "الذكاء الضيّق (Narrow AI)", "الذكاء الافتراضي"], correct: 2 },
+  { q: "في مخطط الدوائر المتداخلة (AI vs ML vs Deep Learning vs GenAI)، أي المصطلحات يمثّل الدائرة الأوسع التي تحتوي كل الباقي؟",
+    opts: ["التعلّم الآلي (ML)", "التعلّم العميق (Deep Learning)", "الذكاء الاصطناعي (AI)", "الذكاء التوليدي (GenAI)"], correct: 2 },
+  { q: "كيف يعمل نموذج اللغة الكبير (LLM) بشكل أساسي؟",
+    opts: ["يفكر مثل الإنسان تماماً", "يتنبأ بالكلمة التالية بناءً على أنماط تعلّمها من نصوص ضخمة", "يبحث في الإنترنت مباشرة قبل كل إجابة", "يحفظ إجابات جاهزة لكل سؤال ممكن"], correct: 1 },
+  { q: "ما هي الحقيقة الصحيحة مقابل خرافة 'الذكاء الاصطناعي هيمحي كل الوظائف'؟",
+    opts: ["بالفعل سيُلغي كل الوظائف خلال سنوات قليلة", "لن يؤثر على أي وظيفة إطلاقاً", "يغيّر المهام وليس الوظيفة كاملة، ومعظم الوظائف تتكيّف", "يؤثر فقط على الوظائف التقنية"], correct: 2 },
+  { q: "ما المقصود بـ 'الهلوسة' (Hallucination) في الذكاء الاصطناعي؟",
+    opts: ["توقف النظام عن العمل فجأة", "أن يذكر الذكاء الاصطناعي معلومة خاطئة أو مختلقة بثقة تامة وصياغة سليمة", "خطأ في الاتصال بالإنترنت", "بطء في سرعة الاستجابة"], correct: 1 },
+  { q: "ما هي الطريقة الأكثر أماناً عند استخدام إحصائية من إنشاء الذكاء الاصطناعي في تقرير للعميل؟",
+    opts: ["استخدامها مباشرة كما هي", "التحقق منها من مصدر موثوق أولاً", "افتراض صحتها لأن صياغتها دقيقة", "سؤال الذكاء الاصطناعي نفسه ليؤكد إجابته"], correct: 1 },
+  { q: "ماذا يعني مصطلح LLM؟",
+    opts: ["Live Learning Machine", "Large Language Model", "Logical Language Method", "Linked Learning Module"], correct: 1 },
+  { q: "ما وظيفة تقنية RAG (التوليد المعزّز بالاسترجاع)؟",
+    opts: ["توليد صور فقط", "دمج النموذج مع نظام بحث يسترجع معلومات محددة قبل توليد إجابة أدق", "ترجمة النصوص بين اللغات", "تسريع الاتصال بالإنترنت"], correct: 1 },
+  { q: "ماذا يمثّل اختصار MCP الذي ذُكر في مفردات الكورس؟",
+    opts: ["Model Context Protocol — معيار مفتوح لربط الذكاء الاصطناعي بأدوات وخدمات خارجية", "Multiple Chat Platforms", "Machine Coding Program", "Main Cloud Provider"], correct: 0 },
+  { q: "ما المقصود بـ 'الذكاء الاصطناعي العامل' (Agentic AI)؟",
+    opts: ["ذكاء اصطناعي يحتاج توجيهاً بشرياً في كل خطوة", "ذكاء اصطناعي يعمل بشكل مستقل، يخطط وينفذ مهام متعددة الخطوات دون إشراف مستمر", "برنامج لتحرير الصور فقط", "نظام لحفظ كلمات المرور"], correct: 1 },
+  { q: "ما هو المقصود بـ AGI (الذكاء الاصطناعي العام)؟",
+    opts: ["ذكاء اصطناعي افتراضي قادر على أداء أي مهمة فكرية يقوم بها الإنسان، ولم يتحقق بعد", "أداة توليد نصوص بسيطة", "نظام تشغيل الهواتف", "برنامج محاسبة آلي"], correct: 0 },
+  { q: "في قاعدة 4D لإتقان استخدام الذكاء الاصطناعي، ما هي الخطوة الأخيرة بعد Delegate وDescribe وDirect؟",
+    opts: ["Delete", "Double-Check (راجع وطوّر)", "Design", "Deploy"], correct: 1 },
+  { q: "بمقارنة 'الأمر الضعيف' و'الأمر القوي' في هندسة الأوامر، ما هو الدرس المستفاد الرئيسي؟",
+    opts: ["الأمر الأقصر دائماً أفضل", "زيادة السياق والتفاصيل والقيود تؤدي إلى نتائج أفضل بشكل واضح", "لا فرق بين الأمر الضعيف والقوي", "يجب تجنب تحديد أي قيود على الإطلاق"], correct: 1 },
+  { q: "في 'تشريح الأمر الجيد' (Role - Task - Context - Constraints)، أي عنصر يحدد 'مين اللي بيتكلم' أو الهوية المهنية؟",
+    opts: ["Task (المهمة)", "Role (الدور)", "Context (السياق)", "Constraints (القيود)"], correct: 1 },
+  { q: "ما هو إطار 'سلسلة التفكير' (Chain-of-Thought) في هندسة الأوامر؟",
+    opts: ["طلب إجابة مباشرة وفورية دون شرح", "الطلب من الذكاء الاصطناعي أن يفكر خطوة بخطوة قبل إعطاء الإجابة النهائية", "إعطاء أمثلة جاهزة فقط", "تحديد شكل المخرجات كـ JSON"], correct: 1 },
+  { q: "أي أداة من أدوات مجموعة 'البحث والتعلّم' تشتهر بالبحث الفوري على الإنترنت وتقديم إجابات موثّقة بمصادر؟",
+    opts: ["ChatGPT فقط", "Perplexity", "Google Sheets", "Photoshop"], correct: 1 }
+];
+
+const labels = ["أ", "ب", "ج", "د"];
+let current = 0;
+let answers = new Array(questions.length).fill(null);
+
+const host = document.getElementById('questionsHost');
+const dotsHost = document.getElementById('dotsHost');
+
+function buildQuestions(){
+  host.innerHTML = "";
+  questions.forEach((item, qi) => {
+    const card = document.createElement('div');
+    card.className = 'qcard';
+    card.dataset.index = qi;
+
+    const num = document.createElement('div');
+    num.className = 'qnum';
+    num.textContent = qi + 1;
+    card.appendChild(num);
+
+    const qt = document.createElement('div');
+    qt.className = 'qtext';
+    qt.textContent = item.q;
+    card.appendChild(qt);
+
+    const optsWrap = document.createElement('div');
+    optsWrap.className = 'options';
+
+    item.opts.forEach((optText, oi) => {
+      const opt = document.createElement('div');
+      opt.className = 'opt';
+      opt.dataset.oi = oi;
+      opt.innerHTML = `<span class="badge">${labels[oi]}</span><span>${optText}</span>`;
+      opt.addEventListener('click', () => selectAnswer(qi, oi));
+      optsWrap.appendChild(opt);
+    });
+    card.appendChild(optsWrap);
+
+    const fb = document.createElement('div');
+    fb.className = 'feedback';
+    fb.id = `fb-${qi}`;
+    card.appendChild(fb);
+
+    host.appendChild(card);
+  });
+
+  for(let i=0;i<questions.length;i++){
+    const dot = document.createElement('div');
+    dot.className = 'dot';
+    dot.dataset.index = i;
+    dot.addEventListener('click', () => { showCard(i); });
+    dotsHost.appendChild(dot);
+  }
+}
+
+function selectAnswer(qi, oi){
+  if(answers[qi] !== null) return; // lock after first choice
+  answers[qi] = oi;
+  const card = host.querySelector(`.qcard[data-index="${qi}"]`);
+  const opts = card.querySelectorAll('.opt');
+  const correctIdx = questions[qi].correct;
+  opts.forEach((el, idx) => {
+    el.classList.add('selected');
+    if(idx === correctIdx) el.classList.add('correct');
+    if(idx === oi && oi !== correctIdx) el.classList.add('incorrect');
+  });
+  const fb = document.getElementById(`fb-${qi}`);
+  fb.classList.add('show');
+  if(oi === correctIdx){
+    fb.classList.add('right');
+    fb.textContent = "إجابة صحيحة ✓";
+  } else {
+    fb.classList.add('wrong');
+    fb.textContent = `إجابة غير صحيحة — الإجابة الصحيحة هي (${labels[correctIdx]}) ${questions[qi].opts[correctIdx]}`;
+  }
+  updateDots();
+  if(qi === questions.length - 1){
+    document.getElementById('nextBtn').textContent = "عرض النتيجة";
+  }
+}
+
+function showCard(index){
+  current = index;
+  document.querySelectorAll('.qcard').forEach(c => c.classList.remove('active'));
+  host.querySelector(`.qcard[data-index="${index}"]`).classList.add('active');
+  document.getElementById('progressLabel').textContent = `سؤال ${toArabicNum(index+1)} / ${toArabicNum(questions.length)}`;
+  document.getElementById('progressFill').style.width = `${((index+1)/questions.length)*100}%`;
+  document.getElementById('prevBtn').disabled = index === 0;
+  document.getElementById('nextBtn').textContent = (index === questions.length - 1) ? "عرض النتيجة" : "التالي";
+  updateDots();
+}
+
+function toArabicNum(n){
+  const map = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+  return String(n).split('').map(d => map[+d] ?? d).join('');
+}
+
+function updateDots(){
+  const dots = dotsHost.querySelectorAll('.dot');
+  dots.forEach((d, i) => {
+    d.classList.toggle('current', i === current);
+    d.classList.toggle('answered', answers[i] !== null);
+  });
+}
+
+document.getElementById('nextBtn').addEventListener('click', () => {
+  if(current === questions.length - 1){
+    showResult();
+  } else {
+    showCard(current + 1);
+  }
+});
+document.getElementById('prevBtn').addEventListener('click', () => {
+  if(current > 0) showCard(current - 1);
+});
+
+function showResult(){
+  document.getElementById('quizArea').style.display = 'none';
+  const score = answers.reduce((acc, a, i) => acc + (a === questions[i].correct ? 1 : 0), 0);
+  document.getElementById('scoreText').textContent = toArabicNum(score);
+  let msg;
+  if(score >= 18) msg = "ممتاز! إتقان كامل تقريباً للمحتوى.";
+  else if(score >= 14) msg = "جيد جداً — راجع الأسئلة التي أخطأت فيها.";
+  else if(score >= 10) msg = "مقبول — يُنصح بمراجعة المادة مرة أخرى.";
+  else msg = "يُنصح بإعادة مشاهدة المادة قبل إعادة المحاولة.";
+  document.getElementById('resultMsg').textContent = msg;
+  document.getElementById('resultPlate').style.display = 'block';
+}
+
+document.getElementById('reviewBtn').addEventListener('click', () => {
+  const reviewHost = document.getElementById('reviewHost');
+  reviewHost.innerHTML = '<div class="plate"><div class="kicker" style="margin-bottom:10px;">مراجعة الإجابات</div></div>';
+  const container = reviewHost.querySelector('.plate');
+  questions.forEach((item, i) => {
+    const isRight = answers[i] === item.correct;
+    const div = document.createElement('div');
+    div.className = 'review-item ' + (isRight ? 'right' : 'wrong');
+    const yourAns = answers[i] !== null ? `${labels[answers[i]]}. ${item.opts[answers[i]]}` : "بدون إجابة";
+    div.innerHTML = `<div class="rq">${i+1}. ${item.q}</div>
+      <div class="ra">إجابتك: ${yourAns}</div>
+      <div class="ra">الإجابة الصحيحة: ${labels[item.correct]}. ${item.opts[item.correct]}</div>`;
+    container.appendChild(div);
+  });
+  reviewHost.style.display = 'block';
+  document.getElementById('resultPlate').scrollIntoView({behavior:'smooth'});
+});
+
+document.getElementById('restartBtn').addEventListener('click', () => {
+  answers = new Array(questions.length).fill(null);
+  current = 0;
+  document.getElementById('resultPlate').style.display = 'none';
+  document.getElementById('reviewHost').style.display = 'none';
+  document.getElementById('reviewHost').innerHTML = '';
+  buildQuestions();
+  document.getElementById('quizArea').style.display = 'block';
+  showCard(0);
+  document.getElementById('coverPlate').scrollIntoView({behavior:'smooth'});
+});
+
+document.getElementById('startBtn').addEventListener('click', () => {
+  document.getElementById('quizArea').style.display = 'block';
+  document.getElementById('startBtn').closest('header').style.display = 'none';
+  showCard(0);
+});
+
+buildQuestions();
+</script>
+</body>
+</html>
